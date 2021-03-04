@@ -4,15 +4,10 @@ const Subscription = function(subscription) {
   this.token = subscription.token
 }
 
-Subscription.create = async (subscription, result) => {
-  sql.query(`INSERT INTO subscriptions SET ?`, subscription, (err, res) => {
-    if (err) {
-      result(err, null);
-      return;
-    }
+Subscription.create = async (subscription) => {
+  const result = await sql.query(`INSERT INTO subscriptions SET ?`, subscription)
 
-    result(null, { sid: res.insertId, ...subscription });
-  })
+  return result[0]
 }
 
 Subscription.getFromToken = async (token) => {
@@ -20,25 +15,5 @@ Subscription.getFromToken = async (token) => {
 
   return result[0][0]
 }
-
-/*Subscription.getFromToken = async (token, result) => {
-  try {
-    sql.query('SELECT * FROM subscriptions WHERE token = ?',
-    [token],
-    (err, res) => {
-      if (res && res.length) {
-        result(null, res[0])
-        return
-      }
-
-      result({ kind: "not_found" }, null);
-      return
-    })
-  }
-  catch (error) {
-    result({ kind: "not_found" }, null);
-    return
-  }
-}*/
 
 module.exports = Subscription
