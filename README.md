@@ -1,13 +1,24 @@
+This service is monitoring the tasks on ACSF and triggers webhooks when events are
+detected. It can monitor as many ACSF subscription and environment than needed.
+
+Once configured, the ACSF subscription is monitored via an API call to /api/v1/tasks
+every minute (configurable). The result is compared with the previous execution
+in order to detect the events which happened. The detected events will then be
+compared with the configured webhooks to trigger POST request to configured url.
+
 # Setup
 - Create a database using the schema.sql file.
-- Execute the `index.js` with appropriate environment variables. This script
-provides the webserver to register applications and configure webhooks.
-- Execute the `worker.js` with appropriate environment variables. This script
+- Execute the `node index.js` with appropriate environment variables. This script
+provides the webserver to register applications and configure webhooks. By default,
+it listens on port 5000.
+- Execute the `node worker.js` with appropriate environment variables. This script
 is looping over the registered applications and responsible of monitoring the
 ACSF tasks to trigger webhook events based on tasks status.
 
-## Environment variables:
-`MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`
+## Environment variables
+- Mysql: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`
+- Webserver: `PORT`
+- Worker: `PERIOD`, `BATCH_SIZE`
 
 # Usage
 - Register a new subscription via a POST request to `api/v1/register` to get a token.
@@ -28,8 +39,8 @@ the token used to connect to ACSF.
 - Register a new webhook via a POST request to `api/v1/applications/:aid/webhooks?token=:token`.
 ```
 {
-    "events": ["release_started", "hotfix_started", "site_update_completed"],
-    "endpoint": "https://domain.tld"
+    "events": ["release_update_started", "cache_clear_completed"],
+    "endpoint": "https://domain.tld?secret=12345"
 }
 ```
 It will return the webhook object enriched with the webhook id (wid).
@@ -56,7 +67,19 @@ Token query argument is mandatory for the following endpoints.
 - Update a webhook: POST `api/v1/applications/:aid/webhooks/:wid`
 - Delete a webhook: DELETE `api/v1/applications/:aid/webhooks/:wid`
 
+# Available events
+## Cache
+- Cache clear started (cache cleared triggered via the ACSF UI or ACSF API)
+- Cache clear completed
+
+## Code release
+- Hotfix release started
+- Hotfix release completed
+- Code+update release started
+- Code+update release completed
+
 # TODO
-- Document the available webhook's events.
 - Validate the application details on creation and update by doing an API request to `api/v1/tasks`.
 - Fix the `status` attribute for webhook object. Not updated via API.
+- Add some debug/logging capacity.
+- Log each job execution and result (tasks before, tasks now, triggered webhooks, ...)
