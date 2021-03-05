@@ -38,19 +38,25 @@ See the other available endpoints to manage applications and webhooks.
 
 # Endpoints
 ## Anonymous
-Register a new subscription: POST api/v1/register
+Register a new subscription: POST `api/v1/register`
 
-## Authenticated (token query argument is mandatory)
+## Authenticated
+Token query argument is mandatory for the following endpoints.
 ### Applications
-Get all the applications: GET api/v1/applications
-Create a new application: POST api/v1/applications
-Get an application: GET api/v1/applications/:aid
-Update an application: POST api/v1/applications/:aid
-Delete an application: DELETE api/v1/applications/:aid
+- Get all the applications: GET `api/v1/applications`
+- Create a new application: POST `api/v1/applications`
+- Get an application: GET `api/v1/applications/:aid`
+- Update an application: POST `api/v1/applications/:aid`
+- Delete an application: DELETE `api/v1/applications/:aid`
 
 ### Webhooks
-Get all the webhooks: GET api/v1/applications/:aid/webhooks
-Create a new webhook: POST api/v1/applications/:aid/webhooks
-Get a webhook: GET api/v1/applications/:aid/webhooks/:wid
-Update a webhook: POST api/v1/applications/:aid/webhooks/:wid
-Delete a webhook: DELETE api/v1/applications/:aid/webhooks/:wid
+- Get all the webhooks: GET `api/v1/applications/:aid/webhooks`
+- Create a new webhook: POST `api/v1/applications/:aid/webhooks`
+- Get a webhook: GET `api/v1/applications/:aid/webhooks/:wid`
+- Update a webhook: POST `api/v1/applications/:aid/webhooks/:wid`
+- Delete a webhook: DELETE `api/v1/applications/:aid/webhooks/:wid`
+
+# TODO
+- Document the available webhook's events.
+- Validate the application details on creation and update by doing an API request to `api/v1/tasks`.
+- Fix the `status` attribute for webhook object. Not updated via API.
