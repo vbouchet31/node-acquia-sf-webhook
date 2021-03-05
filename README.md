@@ -18,7 +18,8 @@ ACSF tasks to trigger webhook events based on tasks status.
 ## Environment variables
 - Mysql: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`
 - Webserver: `PORT`
-- Worker: `PERIOD`, `BATCH_SIZE`
+- Worker: `PERIOD` (worker frequency in minute), `BATCH_SIZE` (number of application/http request to be processed at the same time)
+- ACSF API: `LIMIT` (number of items fetch per pages)
 
 # Usage
 - Register a new subscription via a POST request to `api/v1/register` to get a token.
