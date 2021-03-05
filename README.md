@@ -53,7 +53,8 @@ See the other available endpoints to manage applications and webhooks.
 Register a new subscription: POST `api/v1/register`
 
 ## Authenticated
-Token query argument is mandatory for the following endpoints.
+Token query argument (?token=xxxxxxx) is mandatory for the following endpoints.
+
 ### Applications
 - Get all the applications: GET `api/v1/applications`
 - Create a new application: POST `api/v1/applications`
