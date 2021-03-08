@@ -26,7 +26,7 @@ release.releaseStarted = (taskNow, taskBefore) => {
 
 release.releaseCompleted = (taskNow, taskBefore) => {
   if (taskNow.name == 'Update' && (!taskBefore || taskBefore !== '16') && taskNow.status == '16') {
-    return release.formatEvent('release_update_completed', taskNow)
+    return 'release_update_completed'
   }
 }
 
