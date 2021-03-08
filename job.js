@@ -89,7 +89,6 @@ job.process = async (application) => {
       // in the list of tasks.
       timestamp = tasks.length ? acsf.getMostRecentTaskTimestamp(tasks) : application.previousTimestamp
 
-      // TODO: Compare tasks and application.previousTasks to get the ones which changed.
       let updatedTasks = []
       tasks.forEach(task => {
         let pushed = false
@@ -113,24 +112,33 @@ job.process = async (application) => {
         }
       })
 
-      updatedTasks.forEach(updatedTask => {
-        let payload = events.execute(updatedTask.now, updatedTask.previous)
+      for (const updatedTask of updatedTasks) {
+        let eventName = events.execute(updatedTask.now, updatedTask.previous)
 
-        if (payload) {
-          application.webhooks.forEach(webhook => {
-            if (webhook.events.includes(payload.event)) {
+        if (eventName) {
+          for (const webhook of application.webhooks) {
+            if (webhook.events.includes(eventName)) {
+              let options = {}
+              if (webhook.options && webhook.options.parents) {
+                options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
+              }
+
               fetch(webhook.endpoint, {
                 headers: {
                   'User-Agent': 'node-acquia-sf-client',
                   'Content-type': 'application/json'
                 },
                 method: 'post',
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                  'event': eventName,
+                  'task': updatedTask.now,
+                  'options': options
+                })
               })
             }
-          })
+          }
         }
-      })
+      }
 
       // Filter out all the completed tasks before saving these for the next
       // execution.

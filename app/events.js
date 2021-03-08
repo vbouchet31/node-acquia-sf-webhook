@@ -1,27 +1,28 @@
 const cache = require('./events/cache')
 const release = require('./events/release')
+const varnish = require('./events/varnish')
 
 const events = {}
 
-events.eventTypes = [cache, release]
+events.eventTypes = [cache, release, varnish]
 
 events.execute = function (taskNow, taskBefore) {
-  let payload = false
+  let eventName = false
 
-  // @TODO: Check to stop the loops as soon as a payload is returned.
+  // @TODO: Check to stop the loops as soon as an eventName is returned.
   events.eventTypes.forEach(eventType => {
-    if (!payload) {
+    if (!eventName) {
       if (eventType.classes.includes(taskNow.class)) {
         eventType.events.forEach(event => {
-          if (!payload) {
-            payload = eventType[event](taskNow, taskBefore)
+          if (!eventName) {
+            eventName = eventType[event](taskNow, taskBefore)
           }
         })
       }
     }
   })
 
-  return payload
+  return eventName
 }
 
 module.exports = events

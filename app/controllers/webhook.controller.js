@@ -27,6 +27,7 @@ exports.create = (req, res) => {
   let webhook = new Webhook({
     aid: req.params.aid,
     events: req.body.events,
+    options: req.body.options,
     endpoint: req.body.endpoint,
     status: req.body.status
   })
@@ -48,6 +49,7 @@ exports.create = (req, res) => {
 exports.update = (req, res) => {
   let webhook = new Webhook({
     events: req.body.events,
+    options: req.body.options,
     endpoint: req.body.endpoint,
     status: req.body.status
   })
