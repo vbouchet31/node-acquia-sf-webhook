@@ -65,6 +65,12 @@ Token query argument (?token=xxxxxxx) is mandatory for the following endpoints.
 ### Webhooks
 - Get all the webhooks: GET `api/v1/applications/:aid/webhooks`
 - Create a new webhook: POST `api/v1/applications/:aid/webhooks`
+```
+{
+  "events": ["cacheClearCompleted", "varnishFlushCompleted"],
+  "endpoint": "https://www.domain.tld/webhook/cacheClear",
+}
+```
 - Get a webhook: GET `api/v1/applications/:aid/webhooks/:wid`
 - Update a webhook: POST `api/v1/applications/:aid/webhooks/:wid`
 - Delete a webhook: DELETE `api/v1/applications/:aid/webhooks/:wid`
@@ -80,6 +86,32 @@ Token query argument (?token=xxxxxxx) is mandatory for the following endpoints.
 - Code+update release started
 - Code+update release completed
 
+## More events?
+To enrich the detected events:
+- Create a new file in `app/events`.
+- List down the classes which should be used to identify the tasks used by the events.
+- List down the functions which are detecting events.
+- Write the functions with the business logic to detect events. Each function
+should return a string with the event name when detected.
+
+Example:
+```
+const myEvent = {}
+
+myEvent.classes = [
+  'Acquia\\SfSite\\ClassExample'
+]
+
+myEvent.events = ['eventExampleStarted']
+
+myEvent.eventExampleStarted = (taskNow, taskBefore) => {
+  if (!taskBefore && taskNow.status !== '16') {
+    return 'example_started'
+  }
+}
+
+module.exports = myEvent
+```
 # TODO
 - Validate the application details on creation and update by doing an API request to `api/v1/tasks`.
 - Fix the `status` attribute for webhook object. Not updated via API.
