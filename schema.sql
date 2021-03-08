@@ -52,6 +52,7 @@ CREATE TABLE `webhooks` (
   `wid` int NOT NULL AUTO_INCREMENT,
   `aid` int NOT NULL,
   `events` json NOT NULL,
+  `options` json DEFAULT NULL
   `endpoint` varchar(255) NOT NULL,
   `status` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`wid`)
