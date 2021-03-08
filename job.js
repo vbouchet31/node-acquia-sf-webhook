@@ -135,6 +135,13 @@ job.process = async (application) => {
                   'options': options
                 })
               })
+
+              console.log({
+                'event': eventName,
+                'task': updatedTask.now,
+                'options': options
+              })
+              console.log(options)
             }
           }
         }

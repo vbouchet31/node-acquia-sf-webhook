@@ -86,6 +86,14 @@ Token query argument (?token=xxxxxxx) is mandatory for the following endpoints.
 - Code+update release started
 - Code+update release completed
 
+## Site update
+- Site update started
+- Site update completed
+
+## Varnish
+- Varnish clear started
+- Varnish clear completed
+
 ## More events?
 To enrich the detected events:
 - Create a new file in `app/events`.

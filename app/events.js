@@ -1,10 +1,11 @@
 const cache = require('./events/cache')
 const release = require('./events/release')
+const update = require('./events/update')
 const varnish = require('./events/varnish')
 
 const events = {}
 
-events.eventTypes = [cache, release, varnish]
+events.eventTypes = [cache, release, update, varnish]
 
 events.execute = function (taskNow, taskBefore) {
   let eventName = false
