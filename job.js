@@ -4,6 +4,7 @@ const sf = require('node-acquia-sf-client')
 
 const acsf = require('./app/acsf')
 const events = require('./app/events')
+const logger = require('./app/logger')
 
 const BATCH_SIZE = process.env.BATCH_SIZE || 5
 
@@ -16,10 +17,7 @@ let job = {}
 job.process = async (application) => {
   return new Promise((resolve, reject) => {
     (async() => {
-      // TO BE REMOVED, ONLY TO SIMULATE SOME PROCESSING TIME.
-      //let execTime = Math.random()*10000
-      //console.log(new Date().toISOString() + ' - Processing application ' + application.aid + ' in ' + execTime + 'ms.')
-      //await sleep(execTime)
+      logger.info('Process the application ' + application.env + '-' + application.subscription + ' (application ' + application.aid + ').')
 
       const sfClient = new sf.Client({
         env: application.env,
@@ -123,6 +121,7 @@ job.process = async (application) => {
                 options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
               }
 
+              logger.info('Invoke ' + webhook.endpoint + ' after ' + eventName + ' has been detected (webhook ' + webhook.wid + ').')
               fetch(webhook.endpoint, {
                 headers: {
                   'User-Agent': 'node-acquia-sf-client',
@@ -134,14 +133,10 @@ job.process = async (application) => {
                   'task': updatedTask.now,
                   'options': options
                 })
+              }).catch(error => {
+                logger.error('Error during fetch to ' + webhook.endpoint)
+                logger.error(error)
               })
-
-              console.log({
-                'event': eventName,
-                'task': updatedTask.now,
-                'options': options
-              })
-              console.log(options)
             }
           }
         }

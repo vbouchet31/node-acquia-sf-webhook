@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "batch-iterator": "^1.4.0",
+    "console-log-level": "^1.4.1",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
     "node-acquia-sf-client": "0.0.3",
