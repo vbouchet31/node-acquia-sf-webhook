@@ -66,7 +66,7 @@ async function worker() {
     let loopEnd = Date.now()
     let timeBeforeNext = PERIOD*60*1000 - (loopEnd - loopStart)
     if (timeBeforeNext < 5000) {
-      logger.warning('Next worker execution in ' + timeBeforeNext + 'ms. May need to add more ressource to shorten the worker execution time.')
+      logger.warn('Next worker execution in ' + timeBeforeNext + 'ms. May need to add more ressource to shorten the worker execution time.')
     }
     await sleep(timeBeforeNext)
   }
