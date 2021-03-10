@@ -71,7 +71,7 @@ job.process = async (application) => {
         })
 
         // Get all the tasks since the oldest task.
-        tasks = await sfClient.helper.tasks.getAllTasksSinceTask(oldestTask.id)
+        tasks = await sfClient.helper.tasks.getAllTasksUntilAttr('id', oldestTask.id)
       }
 
       // Filter out the generic tasks which may be considered demon.
@@ -121,7 +121,6 @@ job.process = async (application) => {
                 options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
               }
 
-              logger.info('Invoke ' + webhook.endpoint + ' after ' + eventName + ' has been detected (webhook ' + webhook.wid + ').')
               fetch(webhook.endpoint, {
                 headers: {
                   'User-Agent': 'node-acquia-sf-client',
