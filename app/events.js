@@ -8,22 +8,19 @@ const events = {}
 events.eventTypes = [cache, release, update, varnish]
 
 events.execute = function (taskNow, taskBefore) {
-  let eventName = false
+  for (const eventType of events.eventTypes) {
+    if (eventType.classes.includes(taskNow.class)) {
+      for (const event of eventType.events) {
+        eventName = eventType[event](taskNow, taskBefore)
 
-  // @TODO: Check to stop the loops as soon as an eventName is returned.
-  events.eventTypes.forEach(eventType => {
-    if (!eventName) {
-      if (eventType.classes.includes(taskNow.class)) {
-        eventType.events.forEach(event => {
-          if (!eventName) {
-            eventName = eventType[event](taskNow, taskBefore)
-          }
-        })
+        if (typeof eventName !== 'undefined') {
+          return eventName
+        }
       }
     }
-  })
+  }
 
-  return eventName
+  return false
 }
 
 module.exports = events
