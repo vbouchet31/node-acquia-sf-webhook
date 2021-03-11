@@ -23,7 +23,8 @@ job.process = async (application) => {
         env: application.env,
         subscription: application.subscription,
         username: application.username,
-        token: application.token
+        token: application.token,
+        max_pages: 5
       })
 
       let tasks = []
@@ -38,7 +39,7 @@ job.process = async (application) => {
           return sfClient.api.tasks.list({ page: page })
         }).then(responses => {
           responses.forEach(response => {
-            tasks = tasks.concat(acsf.filterGenericTasks(response))
+            tasks = [...tasks, ...response]
           })
         })
 
@@ -46,7 +47,12 @@ job.process = async (application) => {
         // in the list of tasks.
         timestamp = acsf.getMostRecentTaskTimestamp(tasks)
 
-        // Filter out all the completed tasks.
+        // Now that we have determined the more recent timestamp, we can filter
+        // the generic tasks (such as cron tasks) as we don't want to monitor
+        // these.
+        tasks = acsf.filterGenericTasks(tasks)
+
+        // Filter out all the completed tasks as there is nothing to monitor.
         tasks = tasks.filter(task => {
           return task.completed == '0'
         })
@@ -59,7 +65,7 @@ job.process = async (application) => {
       // completed at that time. In that case, we need to fetch all the tasks
       // which have been added since that time.
       if (!application.previousTasks.length) {
-        tasks = await sfClient.helper.tasks.getAllTasksUntilAttr('added', application.previousTimestamp, '<')
+        tasks = await sfClient.helper.tasks.getAllTasksSince('added', application.previousTimestamp, '>')
       }
       else {
         // Find the oldest (smaller) taskId in the not completed tasks.
@@ -71,8 +77,12 @@ job.process = async (application) => {
         })
 
         // Get all the tasks since the oldest task.
-        tasks = await sfClient.helper.tasks.getAllTasksUntilAttr('id', oldestTask.id)
+        tasks = await sfClient.helper.tasks.getAllTasksSince('id', oldestTask.id, '>=')
       }
+
+      // Determine the currentExecutionTime by finding the most recent timestamp
+      // in the list of tasks.
+      timestamp = tasks.length ? acsf.getMostRecentTaskTimestamp(tasks) : application.previousTimestamp
 
       // Filter out the generic tasks which may be considered demon.
       tasks = acsf.filterGenericTasks(tasks)
@@ -80,12 +90,8 @@ job.process = async (application) => {
       // Keep only the tasks which are not completed or which have completed
       // since the previous execution.
       tasks = tasks.filter(task => {
-        return task.completed == '0' || task.completed > application.previousTimestamp
+        return task.completed == '0' || Number(task.completed) > Number(application.previousTimestamp)
       })
-
-      // Determine the currentExecutionTime by finding the most recent timestamp
-      // in the list of tasks.
-      timestamp = tasks.length ? acsf.getMostRecentTaskTimestamp(tasks) : application.previousTimestamp
 
       let updatedTasks = []
       tasks.forEach(task => {
