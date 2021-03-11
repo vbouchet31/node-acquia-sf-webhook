@@ -34,14 +34,14 @@ acsf.filterGenericTasks = (tasks) => {
 acsf.getMostRecentTaskTimestamp = (tasks) => {
   let timestamp = 0
   tasks.forEach(task => {
-    if (task.completed != '0' && task.completed > timestamp) {
-      timestamp = task.completed
+    if (task.completed != '0' && Number(task.completed) > timestamp) {
+      timestamp = Number(task.completed)
     }
-    if (task.added != '0' && task.added > timestamp) {
-      timestamp = task.added
+    if (task.added != '0' && Number(task.added) > timestamp) {
+      timestamp = Number(task.added)
     }
-    if (task.started != '0' && task.started > timestamp) {
-      timestamp = task.started
+    if (task.started != '0' && Number(task.started) > timestamp) {
+      timestamp = Number(task.started)
     }
   })
 
