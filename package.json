@@ -8,7 +8,7 @@
     "console-log-level": "^1.4.1",
     "express": "^4.17.1",
     "mysql2": "^2.2.5",
-    "node-acquia-sf-client": "0.0.5",
+    "node-acquia-sf-client": "0.0.7",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {},
