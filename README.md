@@ -1,10 +1,16 @@
-WARNING:
+# WARNING - BRANCH SPECIFICS
 On this branch, the storage for subscriptions, applications and webhooks are not
 a MySQL database but a Google Spreadsheet instead. All the endpoints to manage
 (CRUD) the various entities are not working.
 
+This branch also has some optional Heroku specificities. Because a worker need
+to run 24/7 and because free Heroku dynos are limited to ~500hours per month,
+the worker has some capacity to start another app worker after a certain amount
+of loop. To setup this balacing process, create 2 different heroku apps. On
+each app, give the other app information as environment variables so they can
+start and stop each other when needed.
 
-
+***
 This service is monitoring the tasks on ACSF and triggers webhooks when events are
 detected. It can monitor as many ACSF subscription and environment than needed.
 
