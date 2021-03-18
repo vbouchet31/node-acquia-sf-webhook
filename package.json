@@ -2,7 +2,6 @@
   "name": "node-acquia-sf-webhook",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
   "dependencies": {
     "batch-iterator": "^1.4.0",
     "console-log-level": "^1.4.1",
