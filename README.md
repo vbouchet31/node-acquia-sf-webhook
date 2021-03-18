@@ -1,3 +1,10 @@
+WARNING:
+On this branch, the storage for subscriptions, applications and webhooks are not
+a MySQL database but a Google Spreadsheet instead. All the endpoints to manage
+(CRUD) the various entities are not working.
+
+
+
 This service is monitoring the tasks on ACSF and triggers webhooks when events are
 detected. It can monitor as many ACSF subscription and environment than needed.
 
@@ -16,10 +23,15 @@ is looping over the registered applications and responsible of monitoring the
 ACSF tasks to trigger webhook events based on tasks status.
 
 ## Environment variables
-- Mysql: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_DATABASE`
 - Webserver: `PORT`
-- Worker: `PERIOD` (worker frequency in minute), `BATCH_SIZE` (number of application/http request to be processed at the same time)
-- ACSF API: `LIMIT` (number of items fetch per pages)
+- Worker:
+  - `PERIOD` (worker frequency in seconds)
+  - `BATCH_SIZE` (number of application/http request to be processed at the same time)
+  - `HEROKU_APP_NAME` (the heroku's application name used for balancing)
+  - `HEROKU_API_KEY` (the API key to manage the heroku's application used for balancing)
+  - `HEROKU_MAX_LOOP` (the number of loop to execute before balancing to the second application)
+- ACSF API:
+  - `LIMIT` (number of items fetch per pages)
 
 # Usage
 - Register a new subscription via a POST request to `api/v1/register` to get a token.

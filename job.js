@@ -17,7 +17,7 @@ let job = {}
 job.process = async (application) => {
   return new Promise((resolve, reject) => {
     (async() => {
-      logger.info('Process the application ' + application.env + '-' + application.subscription + ' (application ' + application.aid + ').')
+      logger.info('Processing the application ' + application.env + '-' + application.subscription + ' (application ' + application.aid + ').')
 
       const sfClient = new sf.Client({
         env: application.env,
@@ -38,9 +38,12 @@ job.process = async (application) => {
         await iterator([...Array(5).keys()], BATCH_SIZE, function(page) {
           return sfClient.api.tasks.list({ page: page })
         }).then(responses => {
-          responses.forEach(response => {
-            tasks = [...tasks, ...response]
-          })
+          if (responses.length && (typeof responses[Symbol.iterator] === 'function')) {
+            responses.forEach(response => {
+              if (response.length && (typeof response[Symbol.iterator] === 'function'))
+              tasks = [...tasks, ...response]
+            })
+          }
         })
 
         // Determine the currentExecutionTime by finding the most recent timestamp
@@ -139,8 +142,7 @@ job.process = async (application) => {
                   'options': options
                 })
               }).catch(error => {
-                logger.error('Error during fetch to ' + webhook.endpoint)
-                logger.error(error)
+                logger.error('Error during fetch to ' + webhook.endpoint + '(' + error.errno +')')
               })
             }
           }

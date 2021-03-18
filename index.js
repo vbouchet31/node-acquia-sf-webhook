@@ -13,8 +13,8 @@ let app = express()
     next()
   })
 
-require('./app/routes/subscription.routes')(app);
-require('./app/routes/application.routes')(app);
-require('./app/routes/webhook.routes')(app);
+//require('./app/routes/subscription.routes')(app);
+//require('./app/routes/application.routes')(app);
+//require('./app/routes/webhook.routes')(app);
 
 app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
