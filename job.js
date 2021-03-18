@@ -139,10 +139,12 @@ job.process = async (application) => {
                 body: JSON.stringify({
                   'event': eventName,
                   'task': updatedTask.now,
-                  'options': options
+                  'options': options,
+                  'subscription': application.subscription,
+                  'env': application.env
                 })
               }).catch(error => {
-                logger.error('Error during fetch to ' + webhook.endpoint + '(' + error.errno +')')
+                logger.error('Error during fetch to ' + webhook.endpoint + ' (' + error.errno +')')
               })
             }
           }
