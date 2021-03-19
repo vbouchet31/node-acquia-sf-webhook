@@ -7,7 +7,7 @@
     "console-log-level": "^1.4.1",
     "express": "^4.17.1",
     "googleapis": "^67.1.1",
-    "node-acquia-sf-client": "0.0.8",
+    "node-acquia-sf-client": "0.0.9",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {},
