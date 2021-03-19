@@ -14,105 +14,68 @@ start and stop each other when needed.
 This service is monitoring the tasks on ACSF and triggers webhooks when events are
 detected. It can monitor as many ACSF subscription and environment than needed.
 
-Once configured, the ACSF subscription is monitored via an API call to /api/v1/tasks
-every minute (configurable). The result is compared with the previous execution
-in order to detect the events which happened. The detected events will then be
-compared with the configured webhooks to trigger POST request to configured url.
-
 # Setup
-- Create a database using the schema.sql file.
-- Execute the `node index.js` with appropriate environment variables. This script
-provides the webserver to register applications and configure webhooks. By default,
-it listens on port 5000.
+- Create a Google Spreadsheet using the `webhook.xlsx` template.
+- Create a service account on Google and grant him access to the spreadsheet.
 - Execute the `node worker.js` with appropriate environment variables. This script
 is looping over the registered applications and responsible of monitoring the
-ACSF tasks to trigger webhook events based on tasks status.
+ACSF tasks to trigger webhook events based on tasks status. Mandatory environment
+variables are `GDRIVE_DB_FILE` and `GDRIVE_CLIENT_EMAIL`+`GDRIVE_PRIVATE_KEY` or `GDRIVE_CREDENTIALS_FILENAME`
 
-## Environment variables
-- Webserver: `PORT`
-- Worker:
-  - `PERIOD` (worker frequency in seconds)
-  - `BATCH_SIZE` (number of application/http request to be processed at the same time)
-  - `HEROKU_APP_NAME` (the heroku's application name used for balancing)
-  - `HEROKU_API_KEY` (the API key to manage the heroku's application used for balancing)
-  - `HEROKU_MAX_LOOP` (the number of loop to execute before balancing to the second application)
-- ACSF API:
-  - `LIMIT` (number of items fetch per pages)
-- Gdrive:
-  - `GDRIVE_DB_FILE` (the id of the spreadsheet to use as a storage)
-
-# Usage
-- Register a new subscription via a POST request to `api/v1/register` to get a token.
-- Register a new application via a POST request to `api/v1/applications?token=:token`.
-```
-{
-  "env": "dev",
-  "subscription": "mycustomer",
-  "username": "user.name",
-  "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-}
-```
-It will return the application object enriched with the application id (aid).
-
-/!\ Don't be confused with the token returned by `api/v1/register` which is used
-to manage objects via this API and the token in the application object which is
-the token used to connect to ACSF.
-- Register a new webhook via a POST request to `api/v1/applications/:aid/webhooks?token=:token`.
-```
-{
-    "events": ["release_update_started", "cache_clear_completed"],
-    "endpoint": "https://domain.tld?secret=12345"
-}
-```
-It will return the webhook object enriched with the webhook id (wid).
-
-See the other available endpoints to manage applications and webhooks.
-
-# Endpoints
-## Anonymous
-Register a new subscription: POST `api/v1/register`
-
-## Authenticated
-Token query argument (?token=xxxxxxx) is mandatory for the following endpoints.
-
+## Spreadsheet Content
 ### Applications
-- Get all the applications: GET `api/v1/applications`
-- Create a new application: POST `api/v1/applications`
-- Get an application: GET `api/v1/applications/:aid`
-- Update an application: POST `api/v1/applications/:aid`
-- Delete an application: DELETE `api/v1/applications/:aid`
+It contains the information to use the ACSF API.
+`aid`: Should be incremented from the previous line. Will be used to find the
+webhooks related to this application.
+`env`: The environment prefix (dev, test, prod). Use prod for production/live.
+`subscription`: The factory name (https://<env>-<subscription>.acsitefactory.com).
+`token`: The token of a user who can access the API.
+`username`: The username of a use who can access the API.
+
+/!\ Token & username must come from the same account. Be aware that the API key
+may differs across the environments for a same username. Be aware that the API
+endpoints accessible depend on the account role.
 
 ### Webhooks
-- Get all the webhooks: GET `api/v1/applications/:aid/webhooks`
-- Create a new webhook: POST `api/v1/applications/:aid/webhooks`
-```
-{
-  "events": ["cacheClearCompleted", "varnishFlushCompleted"],
-  "endpoint": "https://www.domain.tld/webhook/cacheClear",
-}
-```
-- Get a webhook: GET `api/v1/applications/:aid/webhooks/:wid`
-- Update a webhook: POST `api/v1/applications/:aid/webhooks/:wid`
-- Delete a webhook: DELETE `api/v1/applications/:aid/webhooks/:wid`
+It contains the information about which event to monitor and which url to invoke.
+`aid`: The application id which the webhook relates to.
+`events`: An array of the events to be detected to trigger the webhook. (["event1", "event2"])
+`options`: Some options to enrich the payload. Available options are `parents` and `site` ({"parents": true, "site": false})
+`endpoint`: The endpoint which will receive the payload when the event is detected.
+`status`: Either the webhook is active or not. (1 means active, 0 inactive)
+
+## Environment variables
+- Gdrive:
+  - `GDRIVE_DB_FILE` (the id of the spreadsheet to use as a storage - mandatory)
+  - `GDRIVE_CLIENT_EMAIL` (the email address of the service account)
+  - `GDRIVE_PRIVATE_KEY` (the private key of the service account)
+  - `GDRIVE_CREDENTIALS_FILENAME` (the JSON file generated when the service account has been created. file must be added at the root of the project)
+- Worker:
+  - `PERIOD` (worker frequency in seconds - default to 60)
+  - `BATCH_SIZE` (number of application/http request to be processed at the same time - default to 5)
+  - `HEROKU_APP_NAME` (the heroku's application name used for balancing - optional)
+  - `HEROKU_API_KEY` (the API key to manage the heroku's application used for balancing - optional)
+  - `HEROKU_MAX_LOOP` (the number of loop to execute before balancing to the second application - optional)
+- ACSF API:
+  - `LIMIT` (number of items fetch per pages - default to 100)
 
 # Available events
 ## Cache
-- Cache clear started (cache cleared triggered via the ACSF UI or ACSF API)
-- Cache clear completed
+- Cache clear started (cache cleared triggered via the ACSF UI or ACSF API) (`cache_clear_started`)
+- Cache clear completed (`cache_clear_completed`)
 
 ## Code release
-- Hotfix release started
-- Hotfix release completed
-- Code+update release started
-- Code+update release completed
+- Hotfix release started (`release_hotfix_started`)
+- Hotfix release completed (`release_hotfix_completed`)
+- Code+update release started (`release_update_started`)
+- Code+update release completed (`release_update_completed`)
 
 ## Site update
-- Site update started
-- Site update completed
+- Site update started (`site_update_started`)
+- Site update completed (`site_update_completed`)
 
 ## Varnish
-- Varnish clear started
-- Varnish clear completed
+- Varnish clear completed (`varnish_flush_completed`)
 
 ## More events?
 To enrich the detected events:
@@ -140,8 +103,7 @@ myEvent.eventExampleStarted = (taskNow, taskBefore) => {
 
 module.exports = myEvent
 ```
+
 # TODO
-- Validate the application details on creation and update by doing an API request to `api/v1/tasks`.
-- Fix the `status` attribute for webhook object. Not updated via API.
 - Add some debug/logging capacity.
 - Log each job execution and result (tasks before, tasks now, triggered webhooks, ...)

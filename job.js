@@ -126,9 +126,14 @@ job.process = async (application) => {
         if (eventName) {
           for (const webhook of application.webhooks) {
             if (webhook.events.includes(eventName)) {
-              let options = {}
-              if (webhook.options && webhook.options.parents) {
-                options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
+              if (webhook.options) {
+                if (webhook.options.parents) {
+                  options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
+                }
+
+                if (webhook.options.site && Number(updatedTask.now.nid) !== 0) {
+                  options.site = await sfClient.api.sites.get(updatedTask.now.nid)
+                }
               }
 
               // @TODO: Find a better solution, probably at subscriber side.
