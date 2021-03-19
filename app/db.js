@@ -76,7 +76,12 @@ gdrive.getTable = async (table) => {
         const data = {};
 
         fields.map((field, index) => {
-          data[field] = row[index];
+          try {
+            data[field] = JSON.parse(row[index]);
+          } catch (e) {
+            data[field] = row[index];
+          }
+
         });
 
         result.push(data);
