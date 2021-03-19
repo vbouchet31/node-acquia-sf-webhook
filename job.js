@@ -7,6 +7,7 @@ const events = require('./app/events')
 const logger = require('./app/logger')
 
 const BATCH_SIZE = process.env.BATCH_SIZE || 5
+const FETCH_DELAY_FACTOR = process.env.FETCH_DELAY_FACTOR || 1000
 
 const sleep = async function (duration) {
   await new Promise(r => setTimeout(r, duration));
@@ -130,23 +131,29 @@ job.process = async (application) => {
                 options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
               }
 
-              fetch(webhook.endpoint, {
-                headers: {
-                  'User-Agent': 'node-acquia-sf-client',
-                  'Content-type': 'application/json'
-                },
-                method: 'post',
-                body: JSON.stringify({
-                  'event': eventName,
-                  'task': updatedTask.now,
-                  'options': options,
-                  'subscription': application.subscription,
-                  'env': application.env
+              // @TODO: Find a better solution, probably at subscriber side.
+              // Some events may be grouped (for example site_updated) and hence
+              // trigger batch of requests to the subscriber. Trying to introduce
+              // slight delay between each request.
+              sleep(Math.random() * FETCH_DELAY_FACTOR).then(result => {
+                fetch(webhook.endpoint, {
+                  headers: {
+                    'User-Agent': 'node-acquia-sf-client',
+                    'Content-type': 'application/json'
+                  },
+                  method: 'post',
+                  body: JSON.stringify({
+                    'event': eventName,
+                    'task': updatedTask.now,
+                    'options': options,
+                    'subscription': application.subscription,
+                    'env': application.env
+                  })
+                }).catch(error => {
+                  logger.error('Error during fetch to ' + webhook.endpoint + ' (' + error.errno +')')
+                }).then(success => {
+                  logger.info('Triggered webhook to ' + webhook.endpoint)
                 })
-              }).catch(error => {
-                logger.error('Error during fetch to ' + webhook.endpoint + ' (' + error.errno +')')
-              }).then(success => {
-                logger.info('Triggered webhook to ' + webhook.endpoint)
               })
             }
           }
