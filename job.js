@@ -126,6 +126,7 @@ job.process = async (application) => {
         if (eventName) {
           for (const webhook of application.webhooks) {
             if (webhook.events.includes(eventName)) {
+              let options = {}
               if (webhook.options) {
                 if (webhook.options.parents) {
                   options.parents = await sfClient.helper.tasks.getParentTasks(updatedTask.now.id)
