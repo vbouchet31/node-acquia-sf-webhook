@@ -38,6 +38,8 @@ ACSF tasks to trigger webhook events based on tasks status.
   - `HEROKU_MAX_LOOP` (the number of loop to execute before balancing to the second application)
 - ACSF API:
   - `LIMIT` (number of items fetch per pages)
+- Gdrive:
+  - `GDRIVE_DB_FILE` (the id of the spreadsheet to use as a storage)
 
 # Usage
 - Register a new subscription via a POST request to `api/v1/register` to get a token.
