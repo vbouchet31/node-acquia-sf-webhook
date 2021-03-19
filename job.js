@@ -18,7 +18,7 @@ let job = {}
 job.process = async (application) => {
   return new Promise((resolve, reject) => {
     (async() => {
-      logger.info('Processing the application ' + application.env + '-' + application.subscription + ' (application ' + application.aid + ').')
+      logger.info('Processing the application ' + (application.env ? application.env + '-' : '') + application.subscription + ' (application ' + application.aid + ').')
 
       const sfClient = new sf.Client({
         env: application.env,
