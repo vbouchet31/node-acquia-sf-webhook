@@ -27,7 +27,7 @@ variables are `GDRIVE_DB_FILE` and `GDRIVE_CLIENT_EMAIL`+`GDRIVE_PRIVATE_KEY` or
 It contains the information to use the ACSF API.
 `aid`: Should be incremented from the previous line. Will be used to find the
 webhooks related to this application.
-`env`: The environment prefix (dev, test, prod). Use prod for production/live.
+`env`: The environment prefix (dev, test, prod). Use empty, prod or live for production/live.
 `subscription`: The factory name (https://<env>-<subscription>.acsitefactory.com).
 `token`: The token of a user who can access the API.
 `username`: The username of a use who can access the API.
@@ -103,7 +103,47 @@ myEvent.eventExampleStarted = (taskNow, taskBefore) => {
 
 module.exports = myEvent
 ```
-
+# Payload structure
+```
+{
+  "event": "event_name",
+  "task": {
+    "id": "1234",
+    "parent": "1233",
+    "nid": "12",
+    "uid": "0",
+    ...
+  },
+  "options": {
+    "parents": [
+      {
+        "id": "1233",
+        "parent": "1230",
+        "nid": "0",
+        "uid": "0",
+        ...
+      },
+      {
+        "id": "1230",
+        "parent": "0",
+        "nid", "0",
+        "uid": "14",
+        ...
+      }
+    ],
+    "site": {
+      "id": "12",
+      "site": "my_site_name",
+      "domains": ["my_site_name.dev-sub.acsitefactory.com"],
+      ...
+    }
+  },
+  "env": "dev",
+  "subscription": "sub"
+}
+```
+Task object (both task primary key but also objects in "parents") are task objects returned by ACSF API.
+Site object is a site object returned by ACSF API.
 # TODO
 - Add some debug/logging capacity.
 - Log each job execution and result (tasks before, tasks now, triggered webhooks, ...)
