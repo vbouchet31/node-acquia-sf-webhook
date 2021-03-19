@@ -40,8 +40,15 @@ async function worker() {
 
   while (true) {
     let loopStart = Date.now()
+    loopCount++
 
-    logger.info('Worker execution started.')
+    if (HEROKU_MAX_LOOP) {
+      logger.info(`Worker execution started (${ loopCount } / ${ HEROKU_MAX_LOOP }).`)
+    }
+    else {
+      logger.info('Worker execution started.')
+    }
+
 
     // Get all the webhooks which must be processed.
     let webhooks = await sql.getTable('webhooks').then(results => {
@@ -90,7 +97,12 @@ async function worker() {
     })
 
     // Calculate how long we should wait before running the loop again.
-    logger.info('Worker execution completed.')
+    if (HEROKU_MAX_LOOP) {
+      logger.info(`Worker execution completed (${ loopCount } / ${ HEROKU_MAX_LOOP }).`)
+    }
+    else {
+      logger.info('Worker execution completed.')
+    }
     let loopEnd = Date.now()
     let timeBeforeNext = PERIOD*1000 - (loopEnd - loopStart)
     if (timeBeforeNext <= 0.1*PERIOD) {
@@ -103,7 +115,6 @@ async function worker() {
     // The balancing app will be responsible of killing this current worker.
     // We are adding an extra pause to give enough time for the balancing worker
     // to start and kill us.
-    loopCount++
     if (HEROKU_APP_NAME && HEROKU_API_KEY && HEROKU_MAX_LOOP <= loopCount) {
       logger.info('Starting the second app worker.')
 

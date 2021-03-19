@@ -145,6 +145,8 @@ job.process = async (application) => {
                 })
               }).catch(error => {
                 logger.error('Error during fetch to ' + webhook.endpoint + ' (' + error.errno +')')
+              }).then(success => {
+                logger.info('Triggered webhook to ' + webhook.endpoint)
               })
             }
           }
